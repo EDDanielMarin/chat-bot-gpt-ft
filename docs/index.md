@@ -147,7 +147,7 @@ training_args = TrainingArguments(
  In the fine-tuning process, these graphs provide crucial insights into the model's performance over the course of training:
   <img src="images/graphics.png" alt="Descripción de la imagen">
 
- #### **Loss History (Left Graph):**
+#### **Loss History (Left Graph):**
  - **Y-axis (Loss)**: Represents the loss, which is a measure of how well the model is performing. Lower loss values indicate that the model is improving.
 - **X-axis (Steps)**: Refers to the number of training steps completed during fine-tuning.
  - **Curve**: The loss starts relatively high (around 6), but as the training progresses, it steadily decreases. This signifies that the model is learning and improving over time. Around step 50, the loss significantly drops, and afterward, the curve flattens out, indicating that the model is converging, with fewer improvements occurring as it approaches its optimal state.
