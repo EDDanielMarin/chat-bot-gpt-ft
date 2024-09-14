@@ -24,7 +24,7 @@
 
 This project focuses on the development of an intelligent chatbot using Large Scale Language Models (LLMs) to provide information and advice Personalized health and wellness tips.
 
-## Objective
+## Goal
 
 Develop a chatbot that provides personalized information and advice related to tips, recipes, and vitamins based on each user's individual goals.
 
