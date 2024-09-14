@@ -104,6 +104,9 @@ GPT-2 (Generative Pre-trained Transformer 2) is a cutting-edge language model de
 
   <img src="images/gpt2.png" alt="Descripción de la imagen">
 
+
+  <img src="images/gpt.png" alt="Descripción de la imagen">
+
 #### **Prepare Training Data**:
 To fine-tune the model for a question-answering scenario, it's crucial to prepare a dataset that follows a structured and consistent format. The following JSON structure was used effectively for training in similar scenarios:
 
@@ -123,6 +126,11 @@ Once a pre-trained GPT-2 model is selected, the next step is fine-tuning it with
 **GPT-2 Fine-Tuning Process**
 - **Pre-training**: Initially, GPT-2 is trained on vast internet data, learning to predict the next word in a sequence. This step teaches it general language understanding.
 - **Fine-tuning**: In the fine-tuning phase, the model is updated using categorized or task-specific data. This improves its performance on the specific task you are training it for, whether it’s chatbot dialogue, text completion, or any other NLP task.
+
+```python
+model = GPT2LMHeadModel.from_pretrained('gpt2')
+
+```
 
 The following configurations help guide the fine-tuning process efficiently:
 
@@ -204,3 +212,6 @@ iface.launch(share=True)  # Share the interface through a public link
 ## Conclusion
 
 By using pre-trained LLM models, fine-tuning or transfer learning can be applied to leverage the knowledge of these models and adapt them to a specific domain. In this use case, training was applied to data related to dietary supplements and vitamins, resulting in accurate responses at first glance.
+
+## References 
+https://jalammar.github.io/illustrated-gpt2/
