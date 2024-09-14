@@ -1,7 +1,4 @@
 # Healthy Chat Bot using LLMs
-
--Author: Daniel Marin
-
 ## Index
 - [Healthy Chat Bot using LLMs](#healthy-chat-bot-using-llms)
   - [Index](#index)
@@ -10,9 +7,17 @@
   - [Key Features](#key-features)
   - [General Methodology](#general-methodology)
     - [Data Extraction](#data-extraction)
-    - [Data Preprocessing](#data-Preprocessing)
+    - [Data Preprocessing](#data-preprocessing)
     - [Model Fine-Tuning](#model-fine-tuning)
-    - [Chatbot Development](#chatbot-development)
+      - [**Choose a pre-trained model**:](#choose-a-pre-trained-model)
+      - [**Prepare Training Data**:](#prepare-training-data)
+      - [**Train the Model**:](#train-the-model)
+      - [**Loss History (Left Graph):**](#loss-history-left-graph)
+      - [**Accuracy History (Right Graph)**:](#accuracy-history-right-graph)
+    - [Chatbot Development:](#chatbot-development)
+      - [Chatbot Deployment Using Gradio](#chatbot-deployment-using-gradio)
+      - [Key Features of Gradio:](#key-features-of-gradio)
+      - [Code for Deploying the Chatbot with Gradio:](#code-for-deploying-the-chatbot-with-gradio)
   - [Conclusion](#conclusion)
 
 ## Introduction
@@ -47,11 +52,11 @@ The general methodology of the project is divided into four main phases:
 2. **Access the Reddit API**: Use the Reddit API to collect data. You will need to register an application with Reddit to obtain credentials (client ID, client secret, and user agent).
     [Accede a la página de aplicaciones de Reddit.](https://www.reddit.com/prefs/apps "Accede a la página de aplicaciones de Reddit.")
 
-    ![API.png](https://i.postimg.cc/J0ghJ01k/API.png)
+  <img src="images/API.png" alt="Descripción de la imagen">
 
-1. **Data Extraction**: Write scripts to extract posts and comments relevant to the topics of interest. Use keywords like “tips,” “recipes,” “vitamins,” “supplements,” “energy,” “immunity,” etc., to filter the content.
+3. **Data Extraction**: Write scripts to extract posts and comments relevant to the topics of interest. Use keywords like “tips,” “recipes,” “vitamins,” “supplements,” “energy,” “immunity,” etc., to filter the content.
    
-    ```python
+  ```python
         import praw
 
         # Inicializar el cliente de la API de Reddit
@@ -64,12 +69,12 @@ The general methodology of the project is divided into four main phases:
         # Definir los subreddits y palabras clave relevantes
         subreddits = ['supplements', 'vitamins', 'nutrition']
         keywords = ['vitamin', 'supplement', 'nutrient', 'mineral']
-    ```
+   ```
 
-    ### Data Preprocessing
+### Data Preprocessing
 
-    1. **Clean Data**: Remove unnecessary text such as URLs, HTML tags, special characters, and emojis. Text is also normalized by converting it to lowercase.
-        ```python
+1. **Clean Data**: Remove unnecessary text such as URLs, HTML tags, special characters, and emojis. Text is also normalized by converting it to lowercase.
+     ```python
        def clean_text(text):
                 # Check if the text is a list and convert it to a string
                 if isinstance(text, list):
@@ -84,204 +89,118 @@ The general methodology of the project is divided into four main phases:
                 # Remove special characters and numbers
                 text = re.sub(r'[^a-zA-Z\s]', '', text)
                 return text
-        ```
+    ```
 
-    2. **Tokenization**: Split the text into individual words or tokens. This can help understand the frequency and importance of different terms related to supplements and vitamins.
+2. **Tokenization**: Split the text into individual words or tokens. This can help understand the frequency and importance of different terms related to supplements and vitamins.
 
-    3. **Remove Stop Words**: Remove common words that do not contribute to understanding the context, such as “and,” “the,” “is,” etc.
+3. **Remove Stop Words**: Remove common words that do not contribute to understanding the context, such as “and,” “the,” “is,” etc.
 
-    4. **Text Classification**: Classify the data extracted in prompt as user questions and completion of possible answers to train the chatbot
-
-        ```python
-            import json
-            import os
-            from datetime import datetime
-            import re
-            import nltk
-            from nltk.corpus import stopwords
-            from nltk.stem import WordNetLemmatizer
-            import spacy
-
-            # Download the necessary NLTK data
-            nltk.download('punkt', quiet=True)
-            nltk.download('stopwords', quiet=True)
-            nltk.download('wordnet', quiet=True)
-
-            # Initialize NLTK components
-            stop_words = set(stopwords.words('english'))
-            lemmatizer = WordNetLemmatizer()
-
-            # Initialize spaCy for lemmatization and entity extraction
-            nlp = spacy.load("en_core_web_sm")
-
-            def clean_text(text):
-                # Check if the text is a list and convert it to a string
-                if isinstance(text, list):
-                    text = ' '.join(text)
-                
-                # Remove HTML tags
-                text = re.sub(r'<.*?>', '', text)
-                # Remove emojis
-                text = re.sub(r'[𐀀-􏿿]', '', text)
-                # Remove URLs
-                text = re.sub(r'http\S+', '', text)
-                # Remove special characters and numbers
-                text = re.sub(r'[^a-zA-Z\s]', '', text)
-                return text
-
-        ```
+4. **Text Classification**: Classify the data extracted in prompt as user questions and completion of possible answers to train the chatbot
 
 ### Model Fine-Tuning
 
-1. **Choose a pre-trained model**: the gpt2 training model is chosen
-GPT-2 (Generative Pretrained Transformer 2) is a language model based on the Transformers architecture, which generates text in a coherent manner from a given prompt. The model is pre-trained on a large amount of textual data and can be fine-tuned for specific Natural Language Processing (NLP) tasks. The following libraries are essential to work with GPT-2:
-with the following libraries:
+#### **Choose a pre-trained model**: 
+GPT-2 (Generative Pre-trained Transformer 2) is a cutting-edge language model developed by OpenAI. It’s based on the `Transformer `architecture, particularly utilizing the decoder part of the original Transformer model. GPT-2 uses self-attention mechanisms to process and generate text, making it highly effective at understanding context and handling long-range dependencies in text.
 
-    #### Libraries Used
-    - **Transformers (Hugging Face)**: Provides tools to load pre-trained models and tokenizers, and fine-tune models for specific tasks.
-    - **PyTorch**: Framework for building and training deep learning models, used for customizing and training GPT-2.
-    - **Datasets (Hugging Face)**: Helps manage and preprocess large datasets for training and evaluation.
+  <img src="images/gpt2.png" alt="Descripción de la imagen">
+
+#### **Prepare Training Data**:
+To fine-tune the model for a question-answering scenario, it's crucial to prepare a dataset that follows a structured and consistent format. The following JSON structure was used effectively for training in similar scenarios:
+
+  ```json
+          {
+          "prompt": "my prompt ->",
+          "completion": "the answer of the prompt. \n"
+          }
+  ```
+In this format, `prompt` represents the question or statement to which a response is sought, and `completion` contains the expected answer. Ensuring that all data pairs are uniformly structured helps the model understand and learn the desired response pattern. Consistency in formatting facilitates better adaptation to the specific task of answering questions, enhancing the model's ability to generate accurate and coherent responses.
+
+#### **Train the Model**: 
+Fine-tuning GPT-2 with categorized data
+
+Once a pre-trained GPT-2 model is selected, the next step is fine-tuning it with specific data related to the task. Fine-tuning involves updating the model's weights using a new dataset that matches the desired application, allowing GPT-2 to specialize in generating more task-relevant text while retaining its pre-trained knowledge. 
+
+**GPT-2 Fine-Tuning Process**
+- **Pre-training**: Initially, GPT-2 is trained on vast internet data, learning to predict the next word in a sequence. This step teaches it general language understanding.
+- **Fine-tuning**: In the fine-tuning phase, the model is updated using categorized or task-specific data. This improves its performance on the specific task you are training it for, whether it’s chatbot dialogue, text completion, or any other NLP task.
+
+The following configurations help guide the fine-tuning process efficiently:
+
+**Training Arguments**  
+To customize the training process, several hyperparameters and settings can be adjusted via the `TrainingArguments` class from Hugging Face's `Transformers` library. These arguments control key aspects of how GPT-2 learns from your dataset.
+
+```python
+training_args = TrainingArguments(
+    output_dir=OUTPUT_DIR,               # Directory to save model checkpoints
+    per_device_train_batch_size=8,       # Batch size per device during training
+    num_train_epochs=15,                 # Number of training epochs
+    logging_dir=LOGGING_DIR,             # Directory for logs
+    logging_steps=10,                    # Log every 10 steps
+    evaluation_strategy="steps",         # Evaluate the model after each logging step
+    save_steps=10_000,                   # Save the model checkpoint every 10,000 steps
+    save_total_limit=2,                  # Limit to keep only 2 model checkpoints
+    learning_rate=5e-5,                  # Set the learning rate to fine-tune GPT-2
+    warmup_steps=500,                    # Warm-up for the first 500 steps to stabilize learning
+    weight_decay=0.01                    # Add weight decay to improve generalization
+)
+```
+ In the fine-tuning process, these graphs provide crucial insights into the model's performance over the course of training:
+  <img src="images/graphics.png" alt="Descripción de la imagen">
+
+ #### **Loss History (Left Graph):**
+ - **Y-axis (Loss)**: Represents the loss, which is a measure of how well the model is performing. Lower loss values indicate that the model is improving.
+- **X-axis (Steps)**: Refers to the number of training steps completed during fine-tuning.
+ - **Curve**: The loss starts relatively high (around 6), but as the training progresses, it steadily decreases. This signifies that the model is learning and improving over time. Around step 50, the loss significantly drops, and afterward, the curve flattens out, indicating that the model is converging, with fewer improvements occurring as it approaches its optimal state.
+
+#### **Accuracy History (Right Graph)**:
+  - **Y-axis (Accuracy)**: Represents the accuracy of the model, which is a measure of how many predictions it gets correct. Higher accuracy values are better.
+ - **X-axis (Steps)**: Like the loss graph, this represents the number of training steps.
+- **Curve**: The accuracy starts near zero, but after around 50 steps, there is a sharp increase. The accuracy reaches a plateau around 35%, which remains consistent after step 100. This indicates that the model quickly learned from the data and achieved a stable level of performance.
 
 
-2. **Prepare Training Data**: Use the preprocessed and categorized Reddit data to fine-tune the model.
+### Chatbot Development:
+#### Chatbot Deployment Using Gradio
 
+Gradio is a Python library that simplifies the creation of interactive graphical user interfaces (GUI) for machine learning models. It allows you to quickly deploy models on a web-based interface that is easy to use without complex configurations. It is especially useful for NLP projects, like using GPT-2, to create simple chat interfaces.
 
+#### Key Features of Gradio:
+- **Simplicity**: Enables the creation of GUIs with just a few lines of code.
+- **Compatibility with ML models**: Supports integration with deep learning models developed using PyTorch, TensorFlow, and Hugging Face Transformers.
+- **Ease of sharing**: Interfaces created can be shared via public links without the need for additional setup.
 
-3. **Train the Model**: Perform fine-tuning of the model using the categorized data.
+#### Code for Deploying the Chatbot with Gradio:
 
-    ```python
-    import json
-    import torch
-    from torch.utils.data import Dataset
-    from transformers import GPT2Tokenizer, GPT2LMHeadModel, Trainer, TrainingArguments
-    import os
-    os.environ["WANDB_DISABLED"] = "true"
+```python
+import gradio as gr
+import torch
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
 
-    # Configuración del archivo JSON de entrada
-    JSON_FILE = 'data.json'
-    OUTPUT_DIR = './gpt2-finetuned'
-    LOGGING_DIR = './logs'
+# Load the fine-tuned tokenizer and model
+tokenizer = GPT2Tokenizer.from_pretrained('./results')
+model = GPT2LMHeadModel.from_pretrained('./results')
+tokenizer.pad_token = tokenizer.eos_token  # Set padding token
 
-    # Cargar el archivo JSON
-    with open(JSON_FILE, 'r') as file:
-        data = json.load(file)
+# Function to generate responses
+def generate_response(prompt):
+    input_ids = tokenizer.encode(prompt, return_tensors='pt')  # Convert input text into tokens
+    with torch.no_grad():  # Disable gradient calculations to improve performance
+        outputs = model.generate(
+            input_ids,
+            max_length=100,              # Maximum length of the generated response
+            pad_token_id=tokenizer.eos_token_id,  # Padding token
+            do_sample=True,              # Use sampling for diverse responses
+            top_k=50,                    # Top-k sampling
+            top_p=0.95                   # Top-p sampling (nucleus sampling)
+        )
+    response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()  # Decode the output tokens into text
+    return response
 
-    # Extraer y concatenar el contenido de 'prompt' y 'completion'
-    texts = [f"{item['prompt']} {item['completion']}" for item in data]
-
-    # Cargar el tokenizador GPT-2
-    tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
-
-    # Añadir un token de padding al tokenizador
-    tokenizer.pad_token = tokenizer.eos_token
-    tokenizer.pad_token_id = tokenizer.eos_token_id
-
-    # Tokenizar los textos
-    encodings = tokenizer(texts, return_tensors='pt', truncation=True, padding=True, max_length=128)
-
-    # Preparar el conjunto de datos
-    class TextDataset(Dataset):
-        def __init__(self, encodings):
-            self.input_ids = encodings['input_ids']
-            self.attention_mask = encodings['attention_mask']
-
-            # Usar input_ids como etiquetas para la tarea de modelado de lenguaje
-            self.labels = self.input_ids.clone()
-
-        def __len__(self):
-            return len(self.input_ids)
-
-        def __getitem__(self, idx):
-            return {
-                'input_ids': self.input_ids[idx],
-                'attention_mask': self.attention_mask[idx],
-                'labels': self.labels[idx]
-            }
-
-    dataset = TextDataset(encodings)
-
-    # Cargar el modelo GPT-2
-    model = GPT2LMHeadModel.from_pretrained('gpt2')
-
-    # Configurar los argumentos del entrenamiento
-    training_args = TrainingArguments(
-        output_dir=OUTPUT_DIR,
-        per_device_train_batch_size=8,
-        num_train_epochs=15,
-        logging_dir=LOGGING_DIR,
-        logging_steps=10,
-        save_steps=10_000,
-        save_total_limit=2,
-        learning_rate=5e-5,
-        warmup_steps=500,
-        weight_decay=0.01
-    )
-
-    # Configurar el entrenador
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=dataset
-    )
-
-    # Iniciar el entrenamiento
-    trainer.train()
-
-    # Guardar el modelo y el tokenizador
-    model.save_pretrained('./results')
-    tokenizer.save_pretrained('./results')
-    ```
-
-    ### Chatbot Development:
-    Deployment: The chatbot is deployed on a user-accessible platform such as a website using Gradio.
-    ![chatbot.png](https://i.postimg.cc/hjXWmrh2/chatbot.png)
-
-    ```python
-        import gradio as gr
-        import torch
-        from transformers import GPT2Tokenizer, GPT2LMHeadModel
-
-        # Cargar el tokenizador y el modelo ajustado
-        tokenizer = GPT2Tokenizer.from_pretrained('./results')
-        model = GPT2LMHeadModel.from_pretrained('./results')
-        tokenizer.pad_token = tokenizer.eos_token
-
-        def generar_respuesta(prompt):
-            input_ids = tokenizer.encode(prompt, return_tensors='pt')
-            with torch.no_grad():
-                outputs = model.generate(
-                    input_ids,
-                    max_length=100,
-                    pad_token_id=tokenizer.eos_token_id,
-                    do_sample=True,
-                    top_k=50,
-                    top_p=0.95
-                )
-            response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
-            return response
-
-        # Crear la interfaz con Gradio
-        iface = gr.Interface(fn=generar_respuesta, inputs="text", outputs="text", title="Chatbot")
-        iface.launch(share=True)
-    ```
-    
-[![Chatbot Healthy Bot](https://i.postimg.cc/hjXWmrh2/chatbot.png)](https://9647e1623433d31f97.gradio.live/)
+# Create the interface with Gradio
+iface = gr.Interface(fn=generate_response, inputs="text", outputs="text", title="Chatbot")
+iface.launch(share=True)  # Share the interface through a public link
+```
+<iframe src="https://182124d255e5e056ff.gradio.live/" width="800" height="600"></iframe>
 
 ## Conclusion
 
 By using pre-trained LLM models, fine-tuning or transfer learning can be applied to leverage the knowledge of these models and adapt them to a specific domain. In this use case, training was applied to data related to dietary supplements and vitamins, resulting in accurate responses at first glance.
-
-
-
-
-
-
-
-
-
-
-
-
-
-<iframe src="https://182124d255e5e056ff.gradio.live/" width="800" height="600"></iframe>
-
