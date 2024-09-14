@@ -1,7 +1,6 @@
 # Healthy Chat Bot using LLMs
 
 -Author: Daniel Marin
--Institution: MMIA - USFQ
 
 ## Index
 - [Healthy Chat Bot using LLMs](#healthy-chat-bot-using-llms)
@@ -270,7 +269,13 @@ with the following libraries:
 
 ## Conclusion
 
-This project seeks to create an interactive and personalized tool that helps users improve their health and well-being through advice, recipes, and vitamin recommendations tailored to their individual needs. Using advanced natural language processing technologies, the chatbot will be able to provide accurate and relevant information, thus improving the user experience in their quest for a healthier lifestyle.
+By using pre-trained LLM models, fine-tuning or transfer learning can be applied to leverage the knowledge of these models and adapt them to a specific domain. In this use case, training was applied to data related to dietary supplements and vitamins, resulting in accurate responses at first glance.
+
+
+
+
+
+
 
 
 
